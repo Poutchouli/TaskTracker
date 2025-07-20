@@ -12,10 +12,23 @@ import './App.css';
 
 // --- MOCK USER DATA ---
 // In a real app, this would come from a user authentication system
-const MOCK_USERS = {
-  'user_1': { name: 'You', color: 'bg-teal-600' },
-  'user_2': { name: 'Partner', color: 'bg-purple-600' }
+const loadUsersFromStorage = () => {
+    try {
+        const saved = localStorage.getItem('household-users');
+        return saved ? JSON.parse(saved) : {
+            'user_1': { name: 'You', color: 'bg-teal-600' },
+            'user_2': { name: 'Partner', color: 'bg-purple-600' }
+        };
+    } catch (error) {
+        console.warn('Failed to load users from localStorage:', error);
+        return {
+            'user_1': { name: 'You', color: 'bg-teal-600' },
+            'user_2': { name: 'Partner', color: 'bg-purple-600' }
+        };
+    }
 };
+
+const MOCK_USERS = loadUsersFromStorage();
 
 
 // --- DATE HELPER FUNCTIONS ---
@@ -203,21 +216,92 @@ function Header({ setView, currentView, currentUserId, setCurrentUserId }) {
 }
 
 function UserToggle({ currentUserId, setCurrentUserId }) {
+    const [editingUser, setEditingUser] = useState(null);
+    const [editName, setEditName] = useState('');
+
+    const handleEditClick = (userId, userName, e) => {
+        e.stopPropagation();
+        setEditingUser(userId);
+        setEditName(userName);
+    };
+
+    const handleSaveName = (userId) => {
+        if (editName.trim()) {
+            // Update the user name in MOCK_USERS
+            MOCK_USERS[userId].name = editName.trim();
+            // Force a re-render by updating localStorage to persist the change
+            localStorage.setItem('household-users', JSON.stringify(MOCK_USERS));
+        }
+        setEditingUser(null);
+        setEditName('');
+    };
+
+    const handleCancelEdit = () => {
+        setEditingUser(null);
+        setEditName('');
+    };
+
+    const handleKeyPress = (e, userId) => {
+        if (e.key === 'Enter') {
+            handleSaveName(userId);
+        } else if (e.key === 'Escape') {
+            handleCancelEdit();
+        }
+    };
+
     return (
         <div className="flex items-center space-x-2 bg-gray-700 rounded-lg p-2">
             <span className="text-sm text-gray-300">Acting as:</span>
             {Object.entries(MOCK_USERS).map(([userId, user]) => (
-                <button
-                    key={userId}
-                    onClick={() => setCurrentUserId(userId)}
-                    className={`px-3 py-1 text-sm rounded-md transition-all duration-200 ${
-                        currentUserId === userId
-                            ? `${user.color} text-white shadow-md`
-                            : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
-                    }`}
-                >
-                    {user.name}
-                </button>
+                <div key={userId} className="relative">
+                    {editingUser === userId ? (
+                        <div className="flex items-center space-x-1">
+                            <input
+                                type="text"
+                                value={editName}
+                                onChange={(e) => setEditName(e.target.value)}
+                                onKeyDown={(e) => handleKeyPress(e, userId)}
+                                onBlur={() => handleSaveName(userId)}
+                                className="bg-gray-800 border border-gray-600 rounded-md px-2 py-1 text-white text-sm w-20 focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                                autoFocus
+                            />
+                            <button
+                                onClick={() => handleSaveName(userId)}
+                                className="text-green-400 hover:text-green-300 text-xs"
+                                title="Save"
+                            >
+                                ✓
+                            </button>
+                            <button
+                                onClick={handleCancelEdit}
+                                className="text-red-400 hover:text-red-300 text-xs"
+                                title="Cancel"
+                            >
+                                ✕
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="flex items-center group">
+                            <button
+                                onClick={() => setCurrentUserId(userId)}
+                                className={`px-3 py-1 text-sm rounded-md transition-all duration-200 ${
+                                    currentUserId === userId
+                                        ? `${user.color} text-white shadow-md`
+                                        : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
+                                }`}
+                            >
+                                {user.name}
+                            </button>
+                            <button
+                                onClick={(e) => handleEditClick(userId, user.name, e)}
+                                className="ml-1 text-gray-400 hover:text-gray-200 opacity-0 group-hover:opacity-100 transition-opacity text-xs"
+                                title="Edit name"
+                            >
+                                ✏️
+                            </button>
+                        </div>
+                    )}
+                </div>
             ))}
         </div>
     );
