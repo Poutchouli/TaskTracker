@@ -1,0 +1,55 @@
+{
+  "name": "household-harmony-hub",
+  "version": "1.0.0",
+  "description": "A modern, mobile-first web application for managing household tasks, grocery lists, notes, and tracking family activities",
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/household-harmony-hub.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/household-harmony-hub/issues"
+  },
+  "keywords": [
+    "household",
+    "task-management",
+    "grocery-list",
+    "family",
+    "mobile-first",
+    "react",
+    "pwa"
+  ],
+  "private": false,
+  "dependencies": {
+    "firebase": "^10.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "5.0.1",
+    "recharts": "^2.7.2"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
